@@ -1,0 +1,54 @@
+  """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
+    openList = util.PriorityQueue();
+    openList.push(problem.getStartState(),0)
+    opennlist = []
+    opennlist.append(problem.getStartState())
+    closedList = []
+    listofMove = []
+    parent_child = {}
+    dist_from_root = {}
+    dist_from_root[problem.getStartState()] = 0
+    parent_child[problem.getStartState()] = problem.getStartState()
+    all_child_of_parent = {}
+    while not openList.isEmpty():   
+        q = openList.pop()
+        if problem.isGoalState(q):
+            new_path=[]
+            while parent_child[q] != q:
+                new_path.append(q)
+                q = parent_child[q]
+            
+            new_path.append(problem.getStartState())
+            new_path.reverse()
+            x1 = new_path[0]
+            x2 = new_path[1]
+            while(True):
+                for x,y in all_child_of_parent[x1]:
+                    if x==x2:
+                        listofMove.append(y)
+                if problem.isGoalState(x2):
+                    break
+                x1 = x2
+                x2 = new_path[new_path.index(x2)+1]
+            return listofMove
+        children = []
+        closedList.append(q)
+        for x,y,z in problem.getSuccessors(q):
+            children.append((x,y))
+            if x not in opennlist and x not in closedList:
+                openList.update(x, dist_from_root[q]+z+heuristic(x, problem))
+                opennlist.append(x)
+                dist_from_root[x] = dist_from_root[q]+z
+                parent_child[x] = q
+            else:
+                if dist_from_root[x]>dist_from_root[q]+z:
+                    dist_from_root[x] = dist_from_root[q]+z
+                    parent_child[x] = q
+                    if x in closedList:
+                        closedList.remove(x)
+                        openList.update(x,dist_from_root[q]+z+heuristic(x, problem))
+                        opennlist.append(x)
+                    else:
+                        openList.update(x,dist_from_root[q]+z+heuristic(x, problem))
+        all_child_of_parent[q] = children

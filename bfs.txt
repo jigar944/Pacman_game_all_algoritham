@@ -1,0 +1,118 @@
+ openList = util.Queue();
+    openList.push(problem.getStartState())
+    closedList = util.Queue();
+    listofMove = []
+    visitedNodes = []
+    pathNodes = []
+    visited = {}
+    parent_child = {}
+    visited[problem.getStartState()] = "None"
+    while not openList.isEmpty():
+        x = openList.pop()
+        if problem.isGoalState(x):
+            visitedNodes.append(x)
+            break
+        else:
+            visitedNodes.append(x)
+            child = problem.getSuccessors(x)
+            closedList.push(x)
+            if len(child)!=0:
+                ch =[]
+                for c in child:
+                    ch.append(c)
+                    if c[0] not in visited.keys():
+                        openList.push(c[0])
+                        visited[c[0]] = c[1]
+                    else:
+                        value = visited[c[0]]
+                        temp=[]
+                        if value!="None":
+                            if isinstance(value, list):
+                                temp.extend(value)
+                            else:
+                                temp.append(value)
+                            temp.append(c[1])
+                            visited[c[0]] = temp
+                parent_child[x] = ch
+            else:
+                parent_child[x] = []
+                
+    visit = visited.copy()
+    visitedNodes = visitedNodes[::-1]
+    cyclePath = []
+    l = []
+   
+    def ischild(x1,x2):
+        if problem.getStartState() == x2:
+            if x1 not in l:
+                l.append(x1)
+            l.append(x2)
+            temp=[]
+            child = parent_child[x2]
+            for x in child:
+                temp.append(x[0])
+            child = temp
+            if len(child)>1:
+                for c in child:
+                    if not problem.isGoalState(c):
+                        if c in parent_child.keys():
+                           for z in parent_child[c]:
+                               if z[0] in child:
+                                   cyclePath.append(c)                    
+            return
+        child = parent_child[x2]
+        temp=[]
+        for x in child:
+            temp.append(x[0])
+        child = temp
+        if x1 in child:
+                if x1 not in l:
+                    l.append(x1)
+                if len(child)>1:
+                    for c in child:
+                        if not problem.isGoalState(c):
+                            for z in parent_child[c]:
+                                if z[0] in child:
+                                    if z[0] in l:  
+                                        cyclePath.append(c)
+                ischild(x2,visitedNodes[visitedNodes.index(x2)+1])
+                temp=[]       
+        else:
+            if x1 in l:
+                l.remove(x1)
+            ischild(x1,visitedNodes[visitedNodes.index(x2)+1])
+       
+    
+    ischild(visitedNodes[0],visitedNodes[1])
+    for x in cyclePath:
+        if x in l:
+            l.remove(x)
+    l = l[::-1]
+    from game import Directions
+    s = Directions.SOUTH
+    w = Directions.WEST
+    e = Directions.EAST
+    n = Directions.NORTH
+    for z in l:
+        if(visited[z][0]=="South" or visited[z][0]=="North" or visited[z][0]=="East" or visited[z][0]=="West"): 
+            previous = l[l.index(z)-1]
+            for search in parent_child[z]:
+                if search[0]==previous:
+                    if search[1]=="South":
+                        listofMove.append(n)
+                    elif search[1]=="North":
+                        listofMove.append(s)
+                    elif search[1]=="East":
+                        listofMove.append(w)
+                    elif search[1]=="West":
+                        listofMove.append(e) 
+        else:
+            if isinstance(visit[z], list):
+                for i in visit[z]:
+                    if l[l.index(z)-1] in i:
+                        listofMove.append(i)
+            elif visit[z]=="None":
+                    continue
+            else:       
+                listofMove.append(visit[z])        
+    return  listofMove  
