@@ -61,48 +61,7 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-def getActionFromFinalNodeList(l,visited,parent_child):
-    listofMove=[]
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    e = Directions.EAST
-    n = Directions.NORTH
-    for z in l:  
-        if(visited[z][0]=="South" or visited[z][0]=="North" or visited[z][0]=="East" or visited[z][0]=="West" or
-           visited[z][0]=="down" or visited[z][0]=="up" or visited[z][0]=="right" or visited[z][0]=="left"): 
-            previous = l[l.index(z)-1]
-            if z in parent_child.keys():
-                for search in parent_child[z]:
-                    if search[0]==previous:
-                        if search[1]=="South":
-                            listofMove.append(n)
-                        elif search[1]=="North":
-                            listofMove.append(s)
-                        elif search[1]=="East":
-                            listofMove.append(w)    
-                        elif search[1]=="West":
-                            listofMove.append(e) 
-                        elif search[1]=="up":
-                            listofMove.append("down")
-                        elif search[1]=="down":
-                            listofMove.append("up")
-                        elif search[1]=="left":
-                            listofMove.append("right")    
-                        elif search[1]=="right":
-                            listofMove.append("left") 
-                    
-        else:
-            if isinstance(visited[z], list):
-                for i in visited[z]:
-                    if l[l.index(z)-1] in i:
-                        listofMove.append(i)
-            elif visited[z]=="None":
-                    continue
-            else:       
-                listofMove.append(visited[z])        
-    return  listofMove     
-    
+ 
 
 def tinyMazeSearch(problem):
     """
@@ -131,297 +90,112 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
    
-    openList = util.Stack()
-    openList.push(problem.getStartState())
-    closedList = util.Stack()
-    listofMove = []
-    visited = {}
-    parent_child = {}
-    visited[problem.getStartState()] = "None"
-    while not openList.isEmpty():
-        x = openList.pop()
-        if problem.isGoalState(x):
-            closedList.push(x)
-            break
-        else:
-            child = problem.getSuccessors(x)
-            closedList.push(x)
-            if len(child)!=0:
-                ch =[]
-                for c in child:
-                    ch.append(c)
-                    if c[0] not in visited.keys():
-                        openList.push(c[0])
-                        visited[c[0]] = c[1]
-                    else:
-                        value = visited[c[0]]
-                        temp=[]
-                        if value!="None" :
-                            if isinstance(value, list):
-                                temp.extend(value)
-                            else:
-                                temp.append(value)
-                            temp.append(c[1])
-                            visited[c[0]] = temp
-                parent_child[x] = ch
-            else:
-                parent_child[x] = []
-           
-    
-    l = []
-    
-    def ischild(x1,x2):
-        if problem.isGoalState(x2):
-           if x1 not in l:
-               l.append(x1)
-           l.append(x2)
-           return
-       
-        child = [x[0] for x in parent_child[x1]]
-       
-        if x2 in child:
-           if x1 not in l: l.append(x1)
-           ischild(x2,closedList[closedList.index(x2)+1])
-        else:
-           if x1 in l: l.remove(x1)
-           ischild(closedList[closedList.index(x1)-1],x2)
-    
-    closedList = closedList.list
-    ischild(closedList[0],closedList[1])
+    open_list = util.Stack()
 
-    return getActionFromFinalNodeList(l,visited,parent_child)
-                
+    closedList = util.Stack()
+    path = []
+    action_cost = 0  # Cost of each movement.
+
+    start_position = problem.getStartState()
+
+    # Pushes the start position to the Queue.
+    open_list.push((start_position, path, action_cost))
+
+    while not open_list.isEmpty():
+
+        current_node = open_list.pop()
+        position = current_node[0]
+        path = current_node[1]
+
+        if position not in closedList.list:
+            closedList.push(position)
+
+        if problem.isGoalState(position):
+            return path
+
+        successors = problem.getSuccessors(position)
+
+        for item in successors:
+            if item[0] not in closedList.list:
+                new_position = item[0]
+                new_path = path + [item[1]]
+                open_list.push((new_position, new_path, item[2]))
+            
             
 
 def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
-    openList = util.Queue();
-    openList.push(problem.getStartState())
-    closedList = util.Queue();
-    listofMove = []
-    visited = {}
-    parent_child = {}
-    visited[problem.getStartState()] = "None"
-    while not openList.isEmpty():
-        x = openList.pop()
-        if problem.isGoalState(x):
-            closedList.push(x)
-            break
-        else:
-            child = problem.getSuccessors(x)
-            closedList.push(x)
-            if len(child)!=0:
-                ch =[]
-                for c in child:
-                    ch.append(c)
-                    if c[0] not in visited.keys():
-                        openList.push(c[0])
-                        visited[c[0]] = c[1]
-                    else:
-                        value = visited[c[0]]
-                        temp=[]
-                        if value!="None":
-                            if isinstance(value, list):
-                                temp.extend(value)
-                            else:
-                                temp.append(value)
-                            temp.append(c[1])
-                            visited[c[0]] = temp
-                parent_child[x] = ch
-            else:
-                parent_child[x] = []
     
-    closedList = closedList.list
-    cyclePath = []
-    l = []
-   
-    def cycle(child,):
-            for c in child:
-                if not problem.isGoalState(c):
-                    if c in parent_child.keys():
-                       for z in parent_child[c]:
-                           if z[0] in child:
-                               if z[0] in l:
-                                   return True
-    def ischild(x1,x2):
-        if problem.getStartState() == x2:
-            if x1 not in l:
-                l.append(x1)
-            l.append(x2)
-           
-            child = [x[0] for x in parent_child[x2]]
- 
-            if len(child)>1:
-                for c in child:
-                    if not problem.isGoalState(c):
-                        if c in parent_child.keys():
-                           for z in parent_child[c]:
-                               if z[0] in child:
-                                   cyclePath.append(c)                    
-            return
-        
-        child = parent_child[x2]
-        temp=[]
-        for x in child:
-            temp.append(x[0])
-        child = temp
-        if x1 in child:
-                if x1 not in l:
-                    l.append(x1)
-                if len(child)>1:
-                    for c in child:
-                        if not problem.isGoalState(c):
-                            if c in parent_child.keys():
-                                for z in parent_child[c]:
-                                    if z[0] in child:
-                                        if z[0] in l:  
-                                            cyclePath.append(c)
-                ischild(x2,closedList[closedList.index(x2)+1])
-                temp=[]       
-        else:
-            if x1 in l:
-                l.remove(x1)
-            ischild(x1,closedList[closedList.index(x2)+1])
-       
-    
-    ischild(closedList[0],closedList[1])
-    for x in cyclePath:
-        if x in l:
-            l.remove(x)
-    
-    return getActionFromFinalNodeList(l[::-1],visited,parent_child)     
-    
+    open_list = util.Queue()
+
+    closedList = util.Queue()
+    path = []
+    action_cost = 0  # Cost of each movement.
+
+    start_position = problem.getStartState()
+
+    # Pushes the start position to the Queue.
+    open_list.push((start_position, path, action_cost))
+
+    while not open_list.isEmpty():
+
+        current_node = open_list.pop()
+        position = current_node[0]
+        path = current_node[1]
+
+        if position not in closedList.list:
+            closedList.push(position)
+
+        if problem.isGoalState(position):
+            return path
+
+        successors = problem.getSuccessors(position)
+
+        for item in successors:
+            if item[0] not in closedList.list and item[0] not in (node[0] for node in open_list.list):
+                new_position = item[0]
+                new_path = path + [item[1]]
+                open_list.push((new_position, new_path, item[2]))
+                
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    openList = util.PriorityQueue();
-    openList.push(problem.getStartState(),0)
-    closedList = util.Queue();
-    listofMove = []
-    visitedNodes = []
-    visited = {}
-    parent_child = {}
-    dist_from_root = {}
-    dist_from_root[problem.getStartState()] = 0
-    visited[problem.getStartState()] = "None"
-    while not openList.isEmpty():
-        x = openList.pop()
-        if problem.isGoalState(x):
-            visitedNodes.append(x)
-            break
-        else:
-            visitedNodes.append(x)
-            child = problem.getSuccessors(x)    
-            closedList.push(x)
-            if len(child)!=0:
-                ch =[]
-                for c in child:
-                    ch.append(c)
-                    if c[0] not in visited.keys():
-                        openList.update(c[0],dist_from_root[x]+c[2])
-                        dist_from_root[c[0]] = dist_from_root[x]+c[2]
-                        visited[c[0]] = c[1]
-                    else:
-                        value = visited[c[0]]
-                        temp=[]
-                        if value!="None":
-                            if isinstance(value, list):
-                                temp.extend(value)
-                            else:
-                                temp.append(value)
-                            temp.append(c[1])
-                            temp = list(set(temp))
-                            if len(temp)==1:
-                                visited[c[0]] = temp[0]
-                            else:
-                                visited[c[0]] = temp
-                parent_child[x] = ch
-            else:
-                parent_child[x] = []
-                
-    visitedNodes = visitedNodes[::-1]
-    cyclePath = []
-    l = []
-
-    def ischild(x1,x2):
-        print(x1,x2)
-        if problem.getStartState() == x2:
-            if x1 not in l:
-                l.append(x1)
-            l.append(x2)
-            temp=[]
-            child = parent_child[x2]
-            for x in child:
-                temp.append(x[0])
-            child = temp
-            if len(child)>1:
-                for c in child:
-                    if not problem.isGoalState(c):
-                        if c in parent_child.keys():
-                           for z in parent_child[c]:
-                               if z[0] in child:
-                                   cyclePath.append(c)                    
-            return
-        child = parent_child[x2]
-        temp=[]
-        for x in child:
-            temp.append(x[0])
-        child = temp
-        if x1 in child:
-                if x1 not in l:
-                    l.append(x1)
-                if len(child)>1:
-                    for c in child:
-                        if not problem.isGoalState(c):
-                            if c in parent_child.keys():
-                                for z in parent_child[c]:
-                                    if z[0] in child:
-                                        if z[0] in l:  
-                                            cyclePath.append(c)
-                ischild(x2,visitedNodes[visitedNodes.index(x2)+1])      
-        else:
-            if x1 in l:
-                l.remove(x1)
-            ischild(x1,visitedNodes[visitedNodes.index(x2)+1])
-       
+    openList = util.PriorityQueue()
+    startNode = problem.getStartState()
+    cost = 0
+    path = []
+    openList.push((startNode,path),cost)
+    closedList = util.Queue()
     
-    ischild(visitedNodes[0],visitedNodes[1])
-    for x in cyclePath:
-        if x in l:
-            l.remove(x)
-    l = l[::-1]
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    e = Directions.EAST
-    n = Directions.NORTH
-    #print(l)
-    for z in l:
-        if(visited[z][0]=="South" or visited[z][0]=="North" or visited[z][0]=="East" or visited[z][0]=="West"): 
-            previous = l[l.index(z)-1]
-            for search in parent_child[z]:
-                if previous in search:
-                    if search[1]=="South":
-                        listofMove.append(n)
-                    elif search[1]=="North":
-                        listofMove.append(s)
-                    elif search[1]=="East":
-                        listofMove.append(w)
-                    elif search[1]=="West":
-                        listofMove.append(e)
-        else:
-            if isinstance(visited[z], list):
-                previous = l[l.index(z)-1]
-                for search in parent_child[previous]:
-                    if search[0]==z:
-                        listofMove.append(search[1])
-            elif visited[z]=="None":
-                continue
-            else:
-                listofMove.append(visited[z])
-
-    return listofMove 
+    while not openList.isEmpty():
+        
+        current = openList.pop()
+        
+        current_node = current[0]
+        action = current[1]
+        
+        
+        closedList.push(current_node)
+        
+        if problem.isGoalState(current_node):
+            return action
+        
+        
+        successor = problem.getSuccessors(current_node)
+        
+        for child in successor:
+            if child[0] not in closedList.list and (child[0] not in (visited[2][0] for visited in openList.heap)):
+                new_path = action + [child[1]]
+                new_cost = problem.getCostOfActions(new_path)
+                openList.push((child[0],new_path), new_cost)
+            elif (child[0] in (visited[2][0] for visited in openList.heap)):
+                old_cost = [problem.getCostOfActions(node[2][1]) for node in openList.heap if node[2][0]==child[0]][0]
+                new_path = action + [child[1]]
+                if old_cost>problem.getCostOfActions(new_path):
+                    openList.update((child[0],new_path),problem.getCostOfActions(new_path))
+                    
+    
    
 
 def nullHeuristic(state, problem=None):
@@ -434,59 +208,41 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    openList = util.PriorityQueue();
-    openList.push(problem.getStartState(),0)
-    opennlist = []
-    opennlist.append(problem.getStartState())
-    closedList = []
-    listofMove = []
-    parent_child = {}
-    dist_from_root = {}
-    dist_from_root[problem.getStartState()] = 0
-    parent_child[problem.getStartState()] = problem.getStartState()
-    all_child_of_parent = {}
-    while not openList.isEmpty():   
-        q = openList.pop()
-        if problem.isGoalState(q):
-            new_path=[]
-            while parent_child[q] != q:
-                new_path.append(q)
-                q = parent_child[q]
-            
-            new_path.append(problem.getStartState())
-            new_path.reverse()
-            x1 = new_path[0]
-            x2 = new_path[1]
-            while(True):
-                for x,y in all_child_of_parent[x1]:
-                    if x==x2:
-                        listofMove.append(y)
-                if problem.isGoalState(x2):
-                    break
-                x1 = x2
-                x2 = new_path[new_path.index(x2)+1]
-            return listofMove
-        children = []
-        closedList.append(q)
-        for x,y,z in problem.getSuccessors(q):
-            children.append((x,y))
-            if x not in opennlist and x not in closedList:
-                openList.update(x, dist_from_root[q]+z+heuristic(x, problem))
-                opennlist.append(x)
-                dist_from_root[x] = dist_from_root[q]+z
-                parent_child[x] = q
-            else:
-                if dist_from_root[x]>dist_from_root[q]+z:
-                    dist_from_root[x] = dist_from_root[q]+z
-                    parent_child[x] = q
-                    if x in closedList:
-                        closedList.remove(x)
-                        openList.update(x,dist_from_root[q]+z+heuristic(x, problem))
-                        opennlist.append(x)
-                    else:
-                        openList.update(x,dist_from_root[q]+z+heuristic(x, problem))
-        all_child_of_parent[q] = children
+    openList = util.PriorityQueue()
+    startNode = problem.getStartState()
+    cost = 0
+    path = []
+    openList.push((startNode,path),cost)
+    closedList = util.Queue()
+    
+    while not openList.isEmpty():
         
+        current = openList.pop()
+        
+        current_node = current[0]
+        action = current[1]
+        
+        
+        closedList.push(current_node)
+        
+        if problem.isGoalState(current_node):
+            return action
+        
+        
+        successor = problem.getSuccessors(current_node)
+        
+        for child in successor:
+            if child[0] not in closedList.list and (child[0] not in (visited[2][0] for visited in openList.heap)):
+                new_path = action + [child[1]]
+                new_cost = problem.getCostOfActions(new_path)+heuristic(child[0], problem)
+                openList.push((child[0],new_path), new_cost)
+            elif (child[0] in (visited[2][0] for visited in openList.heap)):
+                old_cost = [problem.getCostOfActions(node[2][1]) for node in openList.heap if node[2][0]==child[0]][0]
+                new_path = action + [child[1]]
+                if old_cost>problem.getCostOfActions(new_path):
+                    new_cost = problem.getCostOfActions(new_path) +heuristic(child[0], problem)
+                    openList.update((child[0],new_path),problem.getCostOfActions(new_path))
+       
 
 # Abbreviations
 bfs = breadthFirstSearch

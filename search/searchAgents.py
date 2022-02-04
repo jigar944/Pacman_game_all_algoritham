@@ -288,6 +288,11 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        # Sets the start point to the startingPosition.
+        self.startPoint = self.startingPosition
+
+        # Sets the status of the corners to unvisited state.
+        self.cornersStatus = ["unvisited","unvisited", "unvisited", "unvisited"]
 
     def getStartState(self):
         """
@@ -295,14 +300,20 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startPoint, self.cornersStatus)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        cornersStatus = [item for item in state[1]]
+        # Returns false if even one of the corners has not been visited.
+        if cornersStatus.count("unvisited")>0:
+            return False
+
+        return True
+
 
     def getSuccessors(self, state):
         """
@@ -317,16 +328,21 @@ class CornersProblem(search.SearchProblem):
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            # Add a successor state to the successor list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
+                x, y = state[0][:]
+                dx, dy = Actions.directionToVector(action)
+                cornersStatus = state[1][:]
+                nextx, nexty = int(x + dx), int(y + dy)
+                if not self.walls[nextx][nexty]:
+                    nextPosition = (nextx, nexty)
+                   
+                    if nextPosition in self.corners:
+                        cornersStatus[self.corners.index(nextPosition)] = "visited"
+                       
+                    cost = 1
+                    nextState = (nextPosition, cornersStatus)
+                    successors.append((nextState, action, cost))
 
-            "*** YOUR CODE HERE ***"
-
-        self._expanded += 1 # DO NOT CHANGE
+        self._expanded += 1  # DO NOT CHANGE
         return successors
 
     def getCostOfActions(self, actions):
