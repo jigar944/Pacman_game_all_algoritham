@@ -216,6 +216,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     closedList = util.Queue()
     
     while not openList.isEmpty():
+        
         current = openList.pop()
         
         current_node = current[0]
